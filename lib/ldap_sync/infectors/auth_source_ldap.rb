@@ -93,7 +93,11 @@ module LdapSync::Infectors::AuthSourceLdap
 
         ldap_users[:enabled].each do |login|
           user, is_new_user = find_or_create_user(login)
-          sync_user(user, is_new_user) if user.present?
+          if user.present?
+            sync_user(user, is_new_user)
+          else
+            sync_foreign_user_groups(login)
+          end
         end
       end
 
@@ -270,10 +274,26 @@ module LdapSync::Infectors::AuthSourceLdap
       def find_local_user(username)
         user = ::User.where("LOWER(#{User.table_name}.login) = ?", username.mb_chars.downcase).first
         if user.present? && user.auth_source_id != self.id
-          trace "-- Skipping user '#{user.login}': it already exists on a different auth_source"
+          trace "-- User '#{user.login}' is owned by a different auth_source"
           return nil, true
         end
         return user, false
+      end
+
+      # Applies only this source's group memberships to a user that is owned by
+      # a different ldap auth source. The owning source stays responsible for
+      # the user's fields, status and authentication; here we just add/remove
+      # the groups that fall within this source's groupname pattern.
+      # Disabled unless the "Create groups for foreign users" setting is on.
+      def sync_foreign_user_groups(login)
+        return unless setting.sync_groups_for_foreign_users?
+
+        user = ::User.active.where("LOWER(#{User.table_name}.login) = ?", login.mb_chars.downcase).first
+        return if user.nil? || user.auth_source_id.blank? || user.auth_source_id == self.id
+
+        trace "-- Syncing groups only for '#{user.login}' (#{user.name}): owned by auth_source ##{user.auth_source_id}",
+          :level => :debug, :obj => user.login
+        sync_user_groups(user)
       end
 
       def find_or_create_user(username)

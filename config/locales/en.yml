@@ -36,6 +36,7 @@ en:
   field_nested_groups: "Nested groups"
   field_create_groups: "Create groups"
   field_create_users: "Create users"
+  field_sync_groups_for_foreign_users: "Create groups for foreign users"
   field_sync_on_login: "Synchronize on login"
   field_dyngroups: "Dynamic groups"
   field_dyngroups_cache_ttl: "Cache TTL"

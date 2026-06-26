@@ -7,6 +7,7 @@
   <p><%= f.text_field :fixed_group, :size => 15  %></p>
   <p><%= f.check_box :create_users %></p>
   <p><%= f.check_box :create_groups %></p>
+  <p><%= f.check_box :sync_groups_for_foreign_users %></p>
   <p><%= f.select :dyngroups, options_for_dyngroups %>
     <span id="dyngroups-cache-ttl"><%= f.text_field :dyngroups_cache_ttl, :required => true, :size => 5 %> <%= l(:label_minutes) %></span>
   </p>
