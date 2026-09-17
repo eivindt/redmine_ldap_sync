@@ -58,8 +58,11 @@ namespace :redmine do
         unless ENV['DRY_RUN'].nil?
           trace "\n!!! Dry-run execution !!!\n"
 
-          User.send :include, LdapSync::DryRun::User
-          Group.send :include, LdapSync::DryRun::Group
+          # Guarded: init_task runs once per task, and the included hook
+          # fires on every include call, so a second include (e.g. from
+          # sync_all) would fail on remove_method
+          User.send :include, LdapSync::DryRun::User unless User.include?(LdapSync::DryRun::User)
+          Group.send :include, LdapSync::DryRun::Group unless Group.include?(LdapSync::DryRun::Group)
         end
       end
     end
