@@ -86,7 +86,7 @@ module LdapSync::EntityManager
       return @ldap_users if defined? @ldap_users
 
       with_ldap_connection do |ldap|
-        changes = { enabled: SortedSet.new, locked: SortedSet.new, deleted: SortedSet.new }
+        changes = { enabled: Set.new, locked: Set.new, deleted: Set.new }
 
         unless setting.has_account_flags?
           changes[:enabled] += find_all_users(ldap, n(:login)).map(&:first)
@@ -104,7 +104,7 @@ module LdapSync::EntityManager
         changes[:locked].delete(nil)
 
         users_on_local = self.users.active.map {|u| u.login.downcase }
-        users_on_ldap = changes.values.sum.map(&:downcase)
+        users_on_ldap = changes.values.reduce(:+).map(&:downcase)
         deleted_users = users_on_local - users_on_ldap
         changes[:deleted] = deleted_users
 
@@ -125,7 +125,7 @@ module LdapSync::EntityManager
 
     def groups_changes(user)
       return unless setting.active?
-      changes = { added: SortedSet.new, deleted: SortedSet.new }
+      changes = { added: Set.new, deleted: Set.new }
 
       user_groups = user.groups.map {|g| g.name.downcase }
       groupname_regexp = setting.groupname_regexp
