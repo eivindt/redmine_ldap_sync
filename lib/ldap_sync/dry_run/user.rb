@@ -40,7 +40,7 @@ module LdapSync::DryRun::User
     receiver.send(:include, InstanceMethods)
 
     receiver.instance_eval do
-      has_and_belongs_to_many :groups do
+      has_and_belongs_to_many :groups, :join_table => "#{table_name_prefix}groups_users#{table_name_suffix}" do
         def <<(groups)
           puts "   !! Added to groups '#{groups.map(&:lastname).join("', '")}'" unless groups.empty?
         end
