@@ -18,8 +18,6 @@
  */
 fieldset.box legend { padding-left: 2px; background-image: none; cursor: default; }
 
-#admin-menu a.ldap-sync { background-image:url('../images/server_key.png'); }
-
 tr.ldap_setting.disabled { color: #AAAAAA; }
 
 tr.ldap_setting.disabled a { color: #AAAAAA; }
